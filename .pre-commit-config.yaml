@@ -1,0 +1,17 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.4.0
+    hooks: [ id: black ]
+  - repo: https://github.com/pycqa/ruff-pre-commit
+    rev: v0.4.2
+    hooks: [ id: ruff ]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.10.0
+    hooks: [ id: mypy ]
+  - repo: local
+    hooks:
+      - id: check-ellipsis
+        name: Check for ellipsis placeholders
+        entry: bash -c "! grep -R '^ *\.\.\.$' agents/"
+        language: system
+        pass_filenames: false 
