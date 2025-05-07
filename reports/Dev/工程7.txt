@@ -1,0 +1,14 @@
+### 7. CI/CD & 配布
+
+| 項目      | 内容                                                                                                                                                   |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **要件**  | main ブランチ push→Lint→Test→Build→GitHub Pages                                                                                                          |
+| **手順**  | 1. `.github/workflows/deploy.yml` で `actions/setup-python`→`poetry install`<br>2. `tailwindcss -m` で minify<br>3. 成果物 `/deck_*/` を `gh-pages` に push |
+| **検証**  | PR に “Preview URL” が自動コメント                                                                                                                           |
+| **成果物** | GitHub Actions ワークフロー、CD バッジ                                                                                                                         |
+
+---
+
+
+
+

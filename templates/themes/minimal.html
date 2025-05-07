@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ deck.title }} | AI Slide Generator</title>
+    
+    <!-- Reveal.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Default minimal theme colors */
+            --primary-color: #111827;
+            --secondary-color: #374151;
+            --background-color: #F9FAFB;
+            --text-color: #111827;
+            --font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            
+            /* Override with custom theme values if specified */
+            {% for var_name, var_value in css_variables.items() %}
+            {{ var_name }}: {{ var_value }};
+            {% endfor %}
+        }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            font-weight: 300;
+        }
+        
+        .reveal {
+            font-family: var(--font-family);
+        }
+        
+        .reveal h1, 
+        .reveal h2, 
+        .reveal h3 {
+            color: var(--primary-color);
+            font-weight: 500;
+            line-height: 1.2;
+            margin: 0 0 2rem 0;
+            letter-spacing: -0.02em;
+        }
+        
+        .reveal h1 {
+            font-size: 3.5rem;
+        }
+        
+        .reveal h2 {
+            font-size: 2.5rem;
+        }
+        
+        .reveal .slides {
+            text-align: left;
+        }
+        
+        .reveal .slides section {
+            height: 100%;
+            padding: 3rem;
+            box-sizing: border-box;
+        }
+        
+        /* Slide backgrounds */
+        .slide {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border: 1px solid #E5E7EB;
+            border-radius: 4px;
+        }
+        
+        /* Title slide */
+        .title-slide {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            text-align: left;
+        }
+        
+        .title-slide h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        
+        .title-slide h1:after {
+            content: "";
+            position: absolute;
+            bottom: -0.5rem;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary-color);
+        }
+        
+        .title-slide .subtitle {
+            font-size: 1.8rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            opacity: 0.7;
+        }
+        
+        /* Content slide */
+        .content-slide {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .content-slide h2 {
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        
+        .content-slide h2:after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+        
+        .content-slide .bullet-list {
+            list-style: none;
+            padding: 0;
+            margin: 2rem 0 0 0;
+        }
+        
+        .content-slide .bullet-item {
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            line-height: 1.5;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+        
+        .content-slide .bullet-item:before {
+            content: "—";
+            position: absolute;
+            left: 0;
+            color: var(--secondary-color);
+        }
+        
+        /* Slide footer */
+        .slide-footer {
+            position: absolute;
+            bottom: 1.5rem;
+            right: 3rem;
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .reveal h1 {
+                font-size: 2.5rem;
+            }
+            
+            .reveal h2 {
+                font-size: 2rem;
+            }
+            
+            .title-slide h1 {
+                font-size: 2.5rem;
+            }
+            
+            .content-slide .bullet-item {
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+            }
+            
+            .reveal .slides section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            {% for slide in deck.slides %}
+            <section class="slide {% if slide.slide_type == 'title' %}title-slide{% else %}content-slide{% endif %}">
+                {% if slide.slide_type == 'title' %}
+                <h1>{{ slide.title }}</h1>
+                
+                {% if slide.content and slide.content|length > 0 %}
+                <p class="subtitle">{{ slide.content[0] }}</p>
+                {% endif %}
+                
+                {% else %}
+                <h2>{{ slide.title }}</h2>
+                
+                <ul class="bullet-list">
+                    {% for point in slide.content %}
+                    <li class="bullet-item">{{ point }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                
+                <div class="slide-footer">
+                    {{ deck.title }}
+                </div>
+            </section>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Reveal.js Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.js"></script>
+    <script>
+        Reveal.initialize({
+            width: 1280,
+            height: 720,
+            margin: 0.05,
+            controls: true,
+            progress: true,
+            center: false,
+            hash: true,
+            transition: 'fade',
+            
+            // Presentation metadata
+            title: "{{ deck.title }}"
+        });
+    </script>
+</body>
+</html> 

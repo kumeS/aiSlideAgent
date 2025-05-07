@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ deck.title }} | AI Slide Generator</title>
+    
+    <!-- Reveal.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/theme/black.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            {% for var_name, var_value in css_variables.items() %}
+            {{ var_name }}: {{ var_value }};
+            {% endfor %}
+            --slide-padding: 2rem;
+            --heading-color: #fff;
+            --content-font-size: 1.5rem;
+            --heading-font-size: 2.5rem;
+            --title-font-size: 3.5rem;
+        }
+        
+        body {
+            font-family: 'Noto Sans JP', 'Poppins', var(--font-family), sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .reveal {
+            font-family: 'Noto Sans JP', 'Poppins', var(--font-family), sans-serif;
+        }
+        
+        .reveal h1, 
+        .reveal h2, 
+        .reveal h3 {
+            color: var(--heading-color);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        
+        .reveal h1 {
+            font-size: var(--title-font-size);
+        }
+        
+        .reveal h2 {
+            font-size: var(--heading-font-size);
+        }
+        
+        .reveal .slides {
+            text-align: left;
+        }
+        
+        .reveal .slides section {
+            height: 100%;
+            padding: var(--slide-padding);
+            box-sizing: border-box;
+        }
+        
+        /* 16:9 aspect ratio */
+        .reveal .slides {
+            height: 0;
+            padding-bottom: 56.25%; /* 9/16 = 0.5625 */
+        }
+        
+        /* Custom slide styles */
+        .slide {
+            width: 100%;
+            height: 100%;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Content styling */
+        .content-container {
+            max-width: 80%;
+            margin: 0 auto;
+        }
+        
+        .bullet-point {
+            font-size: var(--content-font-size);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .bullet-marker {
+            color: var(--primary-color);
+            margin-right: 0.75rem;
+        }
+        
+        /* Slide transitions */
+        .reveal .slides section {
+            transition: transform 0.8s cubic-bezier(0.26, 0.86, 0.44, 0.985), 
+                        opacity 0.8s cubic-bezier(0.26, 0.86, 0.44, 0.985);
+        }
+        
+        /* Footer */
+        .slide-footer {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            :root {
+                --slide-padding: 1rem;
+                --content-font-size: 1.2rem;
+                --heading-font-size: 2rem;
+                --title-font-size: 2.5rem;
+            }
+            
+            .content-container {
+                max-width: 95%;
+            }
+        }
+        
+        /* Template variations based on style */
+        {% if deck.theme.name == "Professional" %}
+        .slide-gradient {
+            background: linear-gradient(135deg, var(--background-color), rgba(0, 0, 0, 0.8));
+        }
+        {% elif deck.theme.name == "Creative" %}
+        .slide-gradient {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+        {% elif deck.theme.name == "Minimal" %}
+        .slide-gradient {
+            background: var(--background-color);
+        }
+        {% elif deck.theme.name == "Academic" %}
+        .slide-gradient {
+            background: linear-gradient(180deg, var(--background-color), #1a202c);
+        }
+        {% else %}
+        .slide-gradient {
+            background: linear-gradient(135deg, var(--background-color), #1a202c);
+        }
+        {% endif %}
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            {% for slide in deck.slides %}
+            <section id="{{ slide.id }}" data-type="{{ slide.slide_type }}">
+                {{ slide.html_content|safe }}
+            </section>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Reveal.js Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/plugin/zoom/zoom.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/plugin/notes/notes.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/plugin/highlight/highlight.js"></script>
+    
+    <script>
+        // Initialize Reveal.js
+        Reveal.initialize({
+            width: 1280,
+            height: 720,
+            margin: 0.05,
+            controls: true,
+            progress: true,
+            center: false,
+            hash: true,
+            transition: 'slide',
+            backgroundTransition: 'fade',
+            
+            // Enable plugins
+            plugins: [RevealZoom, RevealNotes, RevealHighlight],
+            
+            // Presentation metadata
+            title: "{{ deck.title }}",
+            
+            // Show the notes when pressing 's'
+            showNotes: {
+                shortcuts: {
+                    enabled: true
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

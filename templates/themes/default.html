@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ deck.title }} | AI Slide Generator</title>
+    
+    <!-- Core Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Default theme colors */
+            --primary-color: #3B82F6;
+            --secondary-color: #10B981;
+            --text-color: #F9FAFB;
+            --background-color: #111827;
+            --font-family: 'Noto Sans JP', 'Montserrat', sans-serif;
+            
+            /* Override with custom theme values if specified */
+            {% for var_name, var_value in css_variables.items() %}
+            {{ var_name }}: {{ var_value }};
+            {% endfor %}
+        }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .slide {
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+        }
+        
+        h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+        
+        .title-slide {
+            text-align: center;
+        }
+        
+        .subtitle {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            opacity: 0.8;
+        }
+        
+        .title-point {
+            font-size: 1.4rem;
+            margin: 0.5rem 0;
+        }
+        
+        .author {
+            margin-top: 3rem;
+            font-size: 1.2rem;
+            opacity: 0.7;
+        }
+        
+        .bullet-list {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0 2rem 0;
+        }
+        
+        .bullet-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .bullet-icon {
+            color: var(--secondary-color);
+            margin-right: 1rem;
+            font-size: 0.7em;
+            margin-top: 0.5em;
+        }
+        
+        .slide-image {
+            max-width: 80%;
+            margin: 1.5rem auto;
+            text-align: center;
+        }
+        
+        .slide-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .slide-footer {
+            position: absolute;
+            bottom: 1rem;
+            right: 2rem;
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            h2 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.5rem;
+            }
+            
+            .bullet-item {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Presentation container -->
+    <div class="presentation">
+        {% for slide in deck.slides %}
+        <div class="slide {% if slide.slide_type == 'title' %}title-slide{% else %}content-slide{% endif %}" id="{{ slide.id }}">
+            {{ slide.html_content|safe }}
+            
+            <div class="slide-footer">
+                {{ deck.title }} | AI Slide Generator
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Simple navigation buttons -->
+    <div style="position: fixed; bottom: 20px; left: 20px; z-index: 1000; display: flex; gap: 10px;">
+        <button id="prev-btn" style="background: var(--primary-color); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">前へ</button>
+        <button id="next-btn" style="background: var(--primary-color); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">次へ</button>
+        <a href="index.html" id="home-btn" style="background: var(--secondary-color); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; text-decoration: none; display: flex; align-items: center;">
+            <i class="fas fa-home" style="margin-right: 5px;"></i> 目次に戻る
+        </a>
+    </div>
+    
+    <!-- Simple navigation script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            let currentSlide = 0;
+            
+            // Hide all slides except the first one
+            function showSlide(index) {
+                // Hide all slides
+                slides.forEach(slide => {
+                    slide.style.display = 'none';
+                });
+                
+                // Show the current slide
+                slides[index].style.display = 'flex';
+            }
+            
+            // Initialize with the first slide
+            showSlide(currentSlide);
+            
+            // Event listeners for navigation buttons
+            document.getElementById('prev-btn').addEventListener('click', function() {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    showSlide(currentSlide);
+                }
+            });
+            
+            document.getElementById('next-btn').addEventListener('click', function() {
+                if (currentSlide < slides.length - 1) {
+                    currentSlide++;
+                    showSlide(currentSlide);
+                }
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    if (currentSlide < slides.length - 1) {
+                        currentSlide++;
+                        showSlide(currentSlide);
+                    }
+                } else if (e.key === 'ArrowLeft') {
+                    if (currentSlide > 0) {
+                        currentSlide--;
+                        showSlide(currentSlide);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ deck.title }} | AI Slide Generator</title>
+    
+    <!-- Core Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.css">
+    
+    <style>
+        :root {
+            /* Default theme colors */
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #f39c12;
+            --danger-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --text-color: #333333;
+            --background-color: #ffffff;
+            --font-family: 'Noto Sans JP', 'Montserrat', sans-serif;
+            
+            /* Override with custom theme values if specified */
+            {% for var_name, var_value in css_variables.items() %}
+            {{ var_name }}: {{ var_value }};
+            {% endfor %}
+        }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .reveal {
+            font-family: var(--font-family);
+        }
+        
+        .reveal .slides section {
+            height: 100%;
+            box-sizing: border-box;
+        }
+        
+        .slide {
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Header Styles */
+        .slide-header {
+            background: linear-gradient(90deg, var(--dark-color), var(--primary-color));
+            height: 90px;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .slide-header h1 {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        /* Content Cards */
+        .content-card {
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary-color);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+        }
+        
+        /* Title Slide */
+        .title-slide {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 100%;
+            background: linear-gradient(135deg, var(--dark-color), var(--primary-color));
+            color: white;
+        }
+        
+        .title-slide h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        
+        .title-slide .subtitle {
+            font-size: 2rem;
+            opacity: 0.9;
+            margin-bottom: 3rem;
+        }
+        
+        .title-slide .author {
+            font-size: 1.3rem;
+            opacity: 0.7;
+            margin-top: 2rem;
+        }
+        
+        /* Content Slide */
+        .content-slide {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 0;
+        }
+        
+        .content-area {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        /* Lists and Points */
+        .bullet-list {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+        
+        .bullet-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.2rem;
+            font-size: 1.5rem;
+            line-height: 1.4;
+        }
+        
+        .bullet-icon {
+            color: var(--primary-color);
+            margin-right: 1rem;
+            flex-shrink: 0;
+            height: 28px;
+            width: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(52, 152, 219, 0.1);
+            border-radius: 50%;
+        }
+        
+        /* Quote Box */
+        .quote-box {
+            background-color: #f5f7fa;
+            border-left: 4px solid var(--primary-color);
+            font-style: italic;
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+        
+        /* Timeline */
+        .timeline {
+            display: flex;
+            align-items: flex-start;
+            margin: 2rem 0;
+            position: relative;
+        }
+        
+        .timeline-step {
+            flex: 1;
+            position: relative;
+            padding: 0 8px;
+        }
+        
+        .timeline-dot {
+            width: 16px;
+            height: 16px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            position: relative;
+            z-index: 2;
+            border: 3px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .timeline-line {
+            position: absolute;
+            top: 8px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #e2e8f0;
+            z-index: 1;
+        }
+        
+        .timeline-content {
+            text-align: center;
+            padding-top: 5px;
+            font-size: 0.9rem;
+        }
+        
+        /* Two-Column Layout */
+        .two-column {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .column {
+            flex: 1;
+        }
+        
+        /* Image Features */
+        .image-feature {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .image-feature img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .image-caption {
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.05);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        /* Highlight and Emphasis */
+        .highlight-text {
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+        
+        .emphasis {
+            font-weight: 700;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 2px;
+        }
+        
+        /* Transitions and Animations */
+        .reveal .slides section {
+            transition: transform 0.8s cubic-bezier(0.26, 0.86, 0.44, 0.985), 
+                        opacity 0.8s cubic-bezier(0.26, 0.86, 0.44, 0.985);
+        }
+        
+        /* Footer */
+        .slide-footer {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            padding: 5px 10px;
+            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .slide-header {
+                height: 70px;
+            }
+            
+            .slide-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .title-slide h1 {
+                font-size: 2.5rem;
+            }
+            
+            .title-slide .subtitle {
+                font-size: 1.5rem;
+            }
+            
+            .bullet-item {
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+            }
+            
+            .two-column {
+                flex-direction: column;
+            }
+            
+            .content-area {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            {% for slide in deck.slides %}
+            <section>
+                {% if slide.slide_type == 'title' %}
+                <!-- Title Slide -->
+                <div class="slide title-slide">
+                    <h1>{{ slide.title }}</h1>
+                    
+                    {% if slide.content and slide.content|length > 0 %}
+                    <div class="subtitle">{{ slide.content[0] }}</div>
+                    {% endif %}
+                    
+                    {% if deck.author %}
+                    <div class="author">{{ deck.author }}</div>
+                    {% endif %}
+                </div>
+                
+                {% else %}
+                <!-- Content Slide -->
+                <div class="slide content-slide">
+                    <div class="slide-header">
+                        <h1>{{ slide.title }}</h1>
+                    </div>
+                    
+                    <div class="content-area">
+                        {% if slide.slide_type == 'quote' %}
+                        <!-- Quote Slide -->
+                        <div class="quote-box p-8 mx-auto max-w-4xl mt-12 text-xl">
+                            <i class="fas fa-quote-left text-3xl text-primary-color opacity-50 mb-4"></i>
+                            {% for point in slide.content %}
+                            <p class="mb-4">{{ point }}</p>
+                            {% endfor %}
+                            <i class="fas fa-quote-right text-3xl text-primary-color opacity-50 float-right"></i>
+                        </div>
+                        
+                        {% elif slide.slide_type == 'image' %}
+                        <!-- Image Slide -->
+                        <div class="flex flex-col items-center justify-center h-full">
+                            <div class="image-feature max-w-4xl">
+                                {% if slide.image_path %}
+                                <img src="{{ slide.image_path }}" alt="{{ slide.title }}">
+                                {% else %}
+                                <div class="bg-gray-200 h-64 flex items-center justify-center">
+                                    <i class="fas fa-image text-4xl text-gray-400"></i>
+                                </div>
+                                {% endif %}
+                                
+                                {% if slide.content and slide.content|length > 0 %}
+                                <div class="image-caption">{{ slide.content[0] }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% elif slide.slide_type == 'timeline' %}
+                        <!-- Timeline Slide -->
+                        <div class="content-card mt-8">
+                            <div class="relative">
+                                <div class="timeline-line"></div>
+                                <div class="timeline">
+                                    {% for point in slide.content %}
+                                    <div class="timeline-step">
+                                        <div class="timeline-dot"></div>
+                                        <div class="timeline-content">
+                                            {{ point }}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% elif slide.slide_type == 'two-column' %}
+                        <!-- Two Column Slide -->
+                        <div class="two-column mt-8">
+                            <div class="column">
+                                <div class="content-card h-full">
+                                    <h3 class="text-xl font-bold mb-4">
+                                        <i class="fas fa-info-circle text-primary-color mr-2"></i>
+                                        情報
+                                    </h3>
+                                    <ul class="bullet-list">
+                                        {% for point in slide.content[:slide.content|length//2] %}
+                                        <li class="bullet-item">
+                                            <div class="bullet-icon">
+                                                <i class="fas fa-check"></i>
+                                            </div>
+                                            <span>{{ point }}</span>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="content-card h-full">
+                                    <h3 class="text-xl font-bold mb-4">
+                                        <i class="fas fa-lightbulb text-primary-color mr-2"></i>
+                                        詳細
+                                    </h3>
+                                    <ul class="bullet-list">
+                                        {% for point in slide.content[slide.content|length//2:] %}
+                                        <li class="bullet-item">
+                                            <div class="bullet-icon">
+                                                <i class="fas fa-arrow-right"></i>
+                                            </div>
+                                            <span>{{ point }}</span>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% else %}
+                        <!-- Standard Content Slide -->
+                        <div class="content-card mt-8">
+                            <ul class="bullet-list">
+                                {% for point in slide.content %}
+                                <li class="bullet-item">
+                                    <div class="bullet-icon">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </div>
+                                    <span>{{ point }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="slide-footer">
+                        {{ deck.title }}
+                    </div>
+                </div>
+                {% endif %}
+            </section>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Reveal.js Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.js"></script>
+    <script>
+        Reveal.initialize({
+            width: 1280,
+            height: 720,
+            margin: 0.05,
+            controls: true,
+            progress: true,
+            center: false,
+            hash: true,
+            transition: 'slide',
+            
+            // Presentation metadata
+            title: "{{ deck.title }}"
+        });
+        
+        // Apply custom CSS variables
+        document.documentElement.style.setProperty('--primary-color', getComputedStyle(document.documentElement).getPropertyValue('--primary-color'));
+        document.documentElement.style.setProperty('--secondary-color', getComputedStyle(document.documentElement).getPropertyValue('--secondary-color'));
+        document.documentElement.style.setProperty('--accent-color', getComputedStyle(document.documentElement).getPropertyValue('--accent-color'));
+    </script>
+</body>
+</html> 

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ deck.title }} | AI Slide Generator</title>
+    
+    <!-- Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.css">
+    
+    <style>
+        :root {
+            /* Default colors */
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #f8f9fa;
+            --text-color: #2c3e50;
+            --accent-color: #f39c12;
+            --card-color: #ffffff;
+            --font-family: 'Noto Sans JP', sans-serif;
+            
+            /* Override with custom theme values if specified */
+            {% for var_name, var_value in css_variables.items() %}
+            {{ var_name }}: {{ var_value }};
+            {% endfor %}
+        }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .reveal {
+            font-family: var(--font-family);
+        }
+        
+        .reveal .slides section {
+            height: 100%;
+            box-sizing: border-box;
+        }
+        
+        .slide {
+            width: 100%;
+            height: 100%;
+            background-color: var(--card-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Header Styles */
+        .slide-header {
+            background: linear-gradient(90deg, #2c3e50, var(--primary-color));
+            height: 80px;
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+        }
+        
+        .slide-header h1 {
+            color: white;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        /* Title Slide */
+        .title-slide {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 100%;
+            background: linear-gradient(145deg, #2c3e50, var(--primary-color));
+            color: white;
+            padding: 2rem;
+        }
+        
+        .title-slide h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .title-slide .subtitle {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+        
+        .title-slide .author {
+            font-size: 1.2rem;
+            opacity: 0.7;
+            margin-top: 2rem;
+            font-weight: 400;
+        }
+        
+        /* Content Slide */
+        .content-slide {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 0;
+        }
+        
+        .content-area {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        /* Cards */
+        .info-card {
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary-color);
+            border-radius: 4px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Profile Card */
+        .profile-card {
+            display: flex;
+            margin-top: 1rem;
+        }
+        
+        .profile-image {
+            border: 4px solid white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 320px;
+        }
+        
+        .profile-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .profile-info {
+            flex-grow: 1;
+            padding-left: 2rem;
+        }
+        
+        /* Lists */
+        .data-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .data-item {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+        }
+        
+        .data-item:last-child {
+            border-bottom: none;
+        }
+        
+        .data-icon {
+            color: var(--primary-color);
+            margin-right: 1rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+        
+        .data-label {
+            font-weight: 500;
+            margin-right: 0.5rem;
+            min-width: 6rem;
+        }
+        
+        /* Career Timeline */
+        .career-list {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+        
+        .career-item {
+            position: relative;
+            padding-left: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+        }
+        
+        .career-item:last-child {
+            border-bottom: none;
+        }
+        
+        .career-item:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+        }
+        
+        /* Two Column Layout */
+        .two-column {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .column {
+            flex: 1;
+        }
+        
+        /* Footer */
+        .slide-footer {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .slide-header {
+                height: 70px;
+            }
+            
+            .slide-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .title-slide h1 {
+                font-size: 2.5rem;
+            }
+            
+            .two-column {
+                flex-direction: column;
+            }
+            
+            .profile-card {
+                flex-direction: column;
+            }
+            
+            .profile-info {
+                padding-left: 0;
+                padding-top: 1.5rem;
+            }
+            
+            .profile-image {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            {% for slide in deck.slides %}
+            <section>
+                {% if slide.slide_type == 'title' %}
+                <!-- Title Slide -->
+                <div class="slide title-slide">
+                    <h1>{{ slide.title }}</h1>
+                    
+                    {% if slide.content and slide.content|length > 0 %}
+                    <div class="subtitle">{{ slide.content[0] }}</div>
+                    {% endif %}
+                    
+                    {% if deck.author %}
+                    <div class="author">{{ deck.author }}</div>
+                    {% endif %}
+                </div>
+                
+                {% elif slide.slide_type == 'profile' %}
+                <!-- Profile Slide -->
+                <div class="slide content-slide">
+                    <div class="slide-header">
+                        <h1>{{ slide.title }}</h1>
+                    </div>
+                    
+                    <div class="content-area">
+                        <div class="profile-card">
+                            <!-- Profile Image -->
+                            <div class="profile-image">
+                                {% if slide.image_path %}
+                                <img src="{{ slide.image_path }}" alt="{{ slide.title }}">
+                                {% else %}
+                                <div class="bg-gray-200 h-64 flex items-center justify-center">
+                                    <i class="fas fa-user text-4xl text-gray-400"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Profile Information -->
+                            <div class="profile-info">
+                                <div class="info-card">
+                                    <h2 class="text-xl font-bold mb-4">基本情報</h2>
+                                    <ul class="data-list">
+                                        {% for point in slide.content %}
+                                        <li class="data-item">
+                                            <i class="fas fa-circle data-icon"></i>
+                                            <span>{{ point }}</span>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="slide-footer">
+                        {{ deck.title }}
+                    </div>
+                </div>
+                
+                {% elif slide.slide_type == 'career' %}
+                <!-- Career Timeline Slide -->
+                <div class="slide content-slide">
+                    <div class="slide-header">
+                        <h1>{{ slide.title }}</h1>
+                    </div>
+                    
+                    <div class="content-area">
+                        <div class="info-card">
+                            <h2 class="text-xl font-bold mb-4">
+                                <i class="fas fa-history text-primary-color mr-2"></i>
+                                経歴一覧
+                            </h2>
+                            <ul class="career-list">
+                                {% for point in slide.content %}
+                                <li class="career-item">{{ point }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="slide-footer">
+                        {{ deck.title }}
+                    </div>
+                </div>
+                
+                {% else %}
+                <!-- Standard Content Slide -->
+                <div class="slide content-slide">
+                    <div class="slide-header">
+                        <h1>{{ slide.title }}</h1>
+                    </div>
+                    
+                    <div class="content-area">
+                        <div class="info-card">
+                            <ul class="data-list">
+                                {% for point in slide.content %}
+                                <li class="data-item">
+                                    <i class="fas fa-check data-icon"></i>
+                                    <span>{{ point }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="slide-footer">
+                        {{ deck.title }}
+                    </div>
+                </div>
+                {% endif %}
+            </section>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Reveal.js Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.js"></script>
+    <script>
+        Reveal.initialize({
+            width: 1280,
+            height: 720,
+            margin: 0.05,
+            controls: true,
+            progress: true,
+            center: false,
+            hash: true,
+            transition: 'slide',
+            
+            // Presentation metadata
+            title: "{{ deck.title }}"
+        });
+    </script>
+</body>
+</html> 

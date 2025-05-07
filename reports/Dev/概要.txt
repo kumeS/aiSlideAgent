@@ -1,0 +1,216 @@
+**提案仕様の作成**
+
+ユーザーは、Genspark.aiのAIスライド作成機能を模倣したAIエージェントの仕様書を求めています。多層的にWeb調査を行い、各スライドの情報抽出や思考過程の洗練、HTML/CSS/JSを用いてスライドを作成。画像の埋め込みやOpenAI Agents SDKの活用も考慮した仕様となります。アーキテクチャ、モジュール、API、スライド生成の流れを詳細に提案する必要があります。最新情報を反映するため、OpenAI Agents SDKについては確認が必要かもしれません。
+
+**ウェブ検索中**
+
+私の知識は2024年6月までですが、最新情報を得るためにウェブを検索する必要があります。「OpenAI Agents SDK」や「Genspark.ai AI slide」などを検索して、詳細を収集します。情報源を参照し、適切な引用をします。公式ドキュメントを含む、OpenAI Agents SDKに関する情報も収集するつもりです。
+
+
+**情報収集中**
+
+私の知識は2024年6月までなので、最新情報を得るためにウェブ検索を行います。「OpenAI Agents SDK」や「Genspark.ai AI slide」などを検索し、詳細な仕様書作成に必要な情報を収集します。情報源を適切に引用し、ユーザーの要望に合った詳細で構造的な仕様を日本語で作成する必要があります。逐次的で完全な仕様にするための段階的なアプローチも踏まえます。
+
+
+思考時間: 22 秒
+
+
+以下は、Genspark.ai の AI スライド機能を参考にしつつ、\*\*Python と OpenAI Agents SDK（2025 年 3 月 11 日リリース版）\*\*で実装する専用 AI エージェントの詳細仕様書です。
+
+---
+
+## 1. 目的とスコープ
+
+* **目的**
+
+  * テキスト入力（テーマやアウトライン）を受け取り、マルチレイヤのウェブリサーチを経て HTML 1 ページ＝1 スライドの形式で高精度かつ視覚的にリッチなプレゼン資料を全自動生成する。
+* **スコープ**
+
+  * 文章・図表・外部画像の収集・要約・レイアウト・スタイル適用・ブラッシュアップまでをワンパスで完結。
+  * 出力形式：スタンドアロン HTML（Reveal.js 互換）、PDF／PowerPoint 変換はオプション。
+  * 日本語／英語混在コンテンツに対応。
+
+## 2. システム全体構成
+
+| レイヤ         | 主要コンポーネント                                           | 役割                                                |
+| ----------- | --------------------------------------------------- | ------------------------------------------------- |
+| **UI 層**    | FastAPI + Next.js 管理ダッシュボード                         | テーマ入力・進捗表示・完成ファイル DL                              |
+| **エージェント層** | OpenAI Agents SDK で定義する 5 役割                        | Research／Outline／SlideWriter／Refiner／ImageFetcher |
+| **ツール層**    | WebSearchTool, HTMLRenderTool, FileTool, PythonTool | 研究・解析・テンプレート描画・ファイル操作                             |
+| **ストレージ層**  | SQLite + Local FileSystem (slide\_assets/)          | メタデータ・生成 HTML/画像キャッシュ                             |
+| **監視層**     | Prometheus + Grafana + OpenTelemetry                | レスポンス時間・API コスト・失敗率                               |
+
+> Agents SDK のマルチエージェント指向は Swarm の後継であり、スレッド共有・ツール呼び出しが簡素化された ([OpenAI][1], [Sid Bharath][2])
+> Genspark AI Slides が採用している「深掘り検索 → スライド細分化 → AI レイアウト」の 3 層構造を踏襲 ([Genspark][3], [AIbase][4])
+
+### 2.1 エージェント定義（YAML 抜粋）
+
+```yaml
+agents:
+  - id: research_agent
+    model: gpt-4o-mini
+    tools: [WebSearchTool, PythonTool]
+  - id: outline_agent
+    model: gpt-4o-mini
+    tools: []
+  - id: slide_writer_agent
+    model: gpt-4o-mini
+    tools: [HTMLRenderTool]
+  - id: refiner_agent
+    model: gpt-4o-mini
+    tools: [HTMLRenderTool, PythonTool]
+  - id: image_fetch_agent
+    model: gpt-4o-mini
+    tools: [WebSearchTool, FileTool]
+workflows:
+  - id: create_slides
+    steps:
+      - call: research_agent.search_deep
+      - call: outline_agent.generate
+      - foreach: slide in outline_agent.slides
+          - parallel:
+              - call: slide_writer_agent.compose(slide)
+              - call: image_fetch_agent.fetch_images(slide)
+          - call: refiner_agent.polish(slide)
+    output: refiner_agent.final_deck_path
+```
+
+## 3. 機能要件
+
+### 3.1 マルチレイヤウェブリサーチ
+
+1. **一次検索**：SERP API（ニュース／学術／画像）にクエリを投げ、上位 30 件を一時取得。
+2. **二次深掘り**：「要約の曖昧部位」を自動検出し、追加クエリを再投入。
+3. **情報統合**：重複 URL をクラスタリングし、信頼度スコアで再ランク付け。
+
+### 3.2 スライド生成パイプライン
+
+| ステージ     | 入力  | 出力             | 主担当エージェント            |
+| -------- | --- | -------------- | -------------------- |
+| Research | テーマ | 要約メモ（Markdown） | research\_agent      |
+| Outline  | 要約  | スライド見出しリスト     | outline\_agent       |
+| Draft    | 見出し | HTML 草稿 + 画像パス | slide\_writer\_agent |
+| Refine   | 草稿  | 最終 HTML        | refiner\_agent       |
+
+### 3.3 画像自動埋め込み
+
+* **検索条件**：Unsplash API／Bing Image Search で CC0 / public-domain を優先。
+* **画質判定**：Python Pillow で解像度 1280×720 以上を強制。
+* **埋込方法**：`<figure><img src="slide_assets/{uuid}.jpg"><figcaption>…</figcaption></figure>`
+
+### 3.4 チェーン・オブ・ソート（CoT）ブラッシュアップ
+
+* Refiner agent が “critique → revise” ループを上限 3 回行い、
+
+  * タイポ・冗長表現削減
+  * 見出し階層の一貫性
+  * 色彩コントラスト比 (WCAG 2.1 AA) 準拠
+    を検証・自動修正。
+
+### 3.5 出力テンプレート
+
+* Reveal.js 4.6 ベース
+* CSS：Tailwind 3（JIT モード）を埋込ビルドでバンドル
+* JS：コードハイライト用 Prism.js／画像 lazy-load を標準搭載
+* **ファイル構造**
+
+  ```
+  /deck_20250504_201530/
+    ├─ index.html
+    ├─ tailwind.css
+    ├─ prism.js
+    └─ slide_assets/
+          └─ img_01.jpg …
+  ```
+
+## 4. 非機能要件
+
+| 項目      | 指標                                               |
+| ------- | ------------------------------------------------ |
+| パフォーマンス | 全 10 スライドで 90 秒以内（GPT-4o 速度基準）                   |
+| 拡張性     | Workflow YAML に 1 ステップ追加で新ツールを導入可                |
+| 品質      | Grammarly API で簡易校正エラー 0 件                       |
+| セキュリティ  | 外部 URL 画像はローカルコピー＆サニタイズ保存                        |
+| コスト     | 生成 1 deck あたり OpenAI Token≦120k, 画像 API≦0.50 USD |
+
+## 5. 実装ステップ（プロンプト例付き）
+
+| Step       | 目的      | ChatGPT への System Prompt 例                                                                          |
+| ---------- | ------- | --------------------------------------------------------------------------------------------------- |
+| ① テーマ入力    | ユーザ意図把握 | `You are ResearchAgent. Conduct a scoped web investigation on "{{TOPIC}}". …`                       |
+| ② 深掘り検索    | 情報網羅    | `Identify ambiguous or low-confidence areas in the memo and propose follow-up queries.`             |
+| ③ アウトライン   | 構造設計    | `You are OutlineAgent. Convert memo into slide headings (≤12).`                                     |
+| ④ スライド下書き  | コンテンツ生成 | `For each heading, draft an HTML slide with key points (<80 words) and placeholder for 16:9 image.` |
+| ⑤ 画像取得     | ビジュアル強化 | `Fetch 1–2 CC0 images matching "{{HEADING}}" maximizing relevance & resolution.`                    |
+| ⑥ ブラッシュアップ | 品質保証    | `Critique the HTML for clarity, accessibility, consistency. Then output corrected HTML.`            |
+
+## 6. ディレクトリ & コードスケルトン
+
+```bash
+ai_slide_agent/
+├─ app.py               # FastAPI サーバ
+├─ agents/              # 各エージェント定義
+│   ├─ research.py
+│   ├─ outline.py
+│   ├─ slide_writer.py
+│   ├─ refiner.py
+│   └─ image_fetch.py
+├─ workflows.yaml       # Agents SDK ワークフロー
+├─ tools/               # 独自ツール実装
+│   ├─ web_search.py
+│   ├─ html_render.py
+│   └─ image_utils.py
+├─ templates/           # Reveal/Tailwind テンプレート
+└─ tests/               # pytest + testcontainers
+```
+
+### 主要クラス例（抜粋）
+
+```python
+# agents/research.py
+from openai_agents import Agent, tool
+from tools.web_search import search_web
+
+class ResearchAgent(Agent):
+    @tool
+    def search_deep(self, topic: str) -> str:
+        """Return consolidated markdown memo for given topic."""
+        return search_web(topic, depth=2)
+```
+
+## 7. 将来拡張案
+
+1. **音声ナレーション自動生成**：Azure TTS で MP3 を各スライドにリンク。
+2. **Google Drive／Notion 連携**：生成ファイルを自動保存・Embed。
+3. **マルチデバイス最適化**：Tailwind Container Queries でスマホ表示に自動対応。
+4. **エンタープライズモード**：社内 Confluence／SharePoint 検索ツールを追加。
+
+## 8. 導入ロードマップ（2 か月計画）
+
+| 週 | マイルストーン                              |
+| - | ------------------------------------ |
+| 1 | リポジトリ初期化、Agents SDK & Serp API 連携    |
+| 2 | Research/Outline エージェント実装、単体テスト      |
+| 3 | SlideWriter テンプレート & Tailwind 組込み    |
+| 4 | ImageFetcher 実装、画像品質フィルター            |
+| 5 | Refiner と CoT ループ最適化、WCAG 自動検証       |
+| 6 | UI ダッシュボード & ファイル DL 機能              |
+| 7 | CI/CD（GitHub Actions）+ Prometheus 計測 |
+| 8 | β公開・ユーザフィードバック ⇒ v1.0 リリース           |
+
+---
+
+### 結論
+
+本仕様は **Genspark.ai の高速スライド生成体験**と **OpenAI Agents SDK の柔軟なマルチエージェント協調機構**を統合し、
+
+* 深い情報収集
+* 高品質 HTML スライド生成
+* 自動画像挿入
+* 品質保証ループ
+  を一連のワークフローとして実現します。これにより、**精度・緻密さ・拡張性**を兼ね備えたプレゼン自動生成基盤を短期間で構築できます。
+
+[1]: https://openai.com/index/new-tools-for-building-agents/?utm_source=chatgpt.com "New tools for building agents | OpenAI"
+[2]: https://www.siddharthbharath.com/openai-agents-sdk/?utm_source=chatgpt.com "A Deep Dive Into The OpenAI Agents SDK - Sid Bharath"
+[3]: https://www.genspark.ai/?utm_source=chatgpt.com "Genspark AI"
+[4]: https://www.aibase.com/news/17418?utm_source=chatgpt.com "Genspark AI Slides Tool Launched - AIbase"

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <title>量子コンピューティングの未来アイコン</title>
+  <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+    <circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="1.5"/>
+    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+    <path d="M12,2 L12,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M12,18 L12,22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M2,12 L6,12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M18,12 L22,12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M21,7 L17,9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M7,15 L3,17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M21,17 L17,15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M7,9 L3,7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M7,4 L16,4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M7,20 L16,20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+</svg> 

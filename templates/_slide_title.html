@@ -1,0 +1,39 @@
+<!-- Title Slide Template -->
+<div class="title-slide">
+  <h1>{{ slide.title }}</h1>
+  
+  {% if slide.subtitle %}
+  <div class="subtitle">{{ slide.subtitle }}</div>
+  {% endif %}
+  
+  {% if slide.content %}
+  <div class="title-content">
+    {% for point in slide.content %}
+    <p class="title-point">{{ point }}</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+  
+  {% if slide.author %}
+  <div class="author">{{ slide.author }}</div>
+  {% endif %}
+</div>
+
+{% if slide.notes %}
+<div class="notes hidden">{{ slide.notes }}</div>
+{% endif %}
+
+<div class="slide-footer">
+    <span class="opacity-70">AI Slide Generator</span>
+</div>
+
+{% if slide.sources %}
+<aside class="source-trace" data-sources="{{ slide.sources | join(',') }}">
+    <strong>Sources:</strong>
+    <ul>
+        {% for src in slide.sources %}
+        <li>{{ src }}</li>
+        {% endfor %}
+    </ul>
+</aside>
+{% endif %} 

@@ -1,0 +1,38 @@
+<section class="slide profile-slide flex flex-col w-full h-full">
+    <h2 class="text-3xl font-bold mb-6">{{ slide.title }}</h2>
+    
+    <div class="profile-layout flex flex-grow">
+        <!-- Profile Image Section -->
+        <div class="w-1/3 flex justify-center items-start pt-4">
+            <div class="profile-image rounded-lg overflow-hidden shadow-lg border-4 border-white">
+                {% if slide.image_path %}
+                <img src="{{ slide.image_path }}" alt="{{ slide.title }}" class="w-full h-auto">
+                {% else %}
+                <div class="bg-gray-100 flex items-center justify-center" style="height: 320px; width: 280px;">
+                    <i class="fas fa-user-circle text-gray-400 text-6xl"></i>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Profile Info Section -->
+        <div class="w-2/3 pl-8">
+            <!-- Basic Info Card -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6 border-l-4 border-blue-500">
+                <h3 class="text-xl font-bold mb-4 text-gray-800">基本情報</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    {% for point in slide.content %}
+                    <div class="flex items-center">
+                        <i class="fas fa-circle text-blue-500 mr-3 w-4 text-center text-xs"></i>
+                        <span>{{ point }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if slide.notes %}
+    <div class="notes hidden">{{ slide.notes }}</div>
+    {% endif %}
+</section> 

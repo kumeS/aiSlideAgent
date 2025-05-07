@@ -1,0 +1,29 @@
+<section class="slide timeline-slide flex flex-col w-full h-full p-10">
+    <h2 class="text-4xl font-bold mb-8">{{ slide.title }}</h2>
+    
+    <div class="flex-grow content-container">
+        <div class="mt-6">
+            <div class="relative">
+                <div class="timeline-line absolute left-0 right-0 h-1 bg-gray-300"></div>
+                <div class="timeline flex">
+                    {% for point in slide.content %}
+                    <div class="timeline-step flex-1 relative px-2">
+                        <div class="timeline-dot w-5 h-5 bg-blue-500 rounded-full mx-auto mb-3 relative z-10 border-2 border-white shadow-md"></div>
+                        <div class="timeline-content text-center">
+                            {{ point }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if slide.notes %}
+    <div class="notes hidden">{{ slide.notes }}</div>
+    {% endif %}
+    
+    <div class="slide-footer">
+        <span class="opacity-70">{{ deck.title }}</span>
+    </div>
+</section> 

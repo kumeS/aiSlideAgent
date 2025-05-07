@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <title>量子コンピューティングアイコン</title>
+  <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.5"/>
+    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+    <path d="M12,2 L12,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M12,18 L12,22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M2,12 L6,12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M18,12 L22,12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M4.93,4.93 L7.76,7.76" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M16.24,16.24 L19.07,19.07" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M4.93,19.07 L7.76,16.24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M16.24,7.76 L19.07,4.93" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+</svg> 

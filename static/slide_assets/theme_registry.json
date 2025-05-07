@@ -1,0 +1,112 @@
+{
+  "modern": {
+    "name": "Modern",
+    "primary_color": "#3498db",
+    "secondary_color": "#2ecc71",
+    "text_color": "#F9FAFB",
+    "background_color": "#111827",
+    "accent_color": "#F59E0B",
+    "header_style": "gradient",
+    "bullet_style": "circle",
+    "transitions": "slide",
+    "description": "A modern, clean design with gradient headers and circular bullets",
+    "version": "1.0",
+    "tags": [
+      "modern",
+      "gradient",
+      "clean"
+    ]
+  },
+  "minimal": {
+    "name": "Minimal",
+    "primary_color": "#333333",
+    "secondary_color": "#666666",
+    "text_color": "#111827",
+    "background_color": "#F9FAFB",
+    "accent_color": "#10B981",
+    "header_style": "minimal",
+    "bullet_style": "dash",
+    "transitions": "fade",
+    "description": "A minimalist design with subtle headers and clean typography",
+    "version": "1.0",
+    "tags": [
+      "minimal",
+      "clean",
+      "light"
+    ]
+  },
+  "professional": {
+    "name": "Professional",
+    "primary_color": "#3B82F6",
+    "secondary_color": "#10B981",
+    "text_color": "#F9FAFB",
+    "background_color": "#111827",
+    "accent_color": "#F59E0B",
+    "header_style": "solid",
+    "bullet_style": "square",
+    "transitions": "slide",
+    "description": "A professional design suitable for business presentations",
+    "version": "1.0",
+    "tags": [
+      "business",
+      "professional",
+      "corporate"
+    ]
+  },
+  "creative": {
+    "name": "Creative",
+    "primary_color": "#8B5CF6",
+    "secondary_color": "#EC4899",
+    "text_color": "#F9FAFB",
+    "background_color": "#18181B",
+    "accent_color": "#F59E0B",
+    "header_style": "gradient",
+    "bullet_style": "arrow",
+    "transitions": "zoom",
+    "description": "A creative, colorful design for impactful presentations",
+    "version": "1.0",
+    "tags": [
+      "creative",
+      "colorful",
+      "impact"
+    ]
+  },
+  "business": {
+    "name": "Business",
+    "primary_color": "#1E40AF",
+    "secondary_color": "#047857",
+    "text_color": "#F9FAFB",
+    "background_color": "#0F172A",
+    "accent_color": "#D97706",
+    "header_style": "solid",
+    "bullet_style": "circle",
+    "transitions": "slide",
+    "description": "A business-oriented design for corporate presentations",
+    "version": "1.0",
+    "tags": [
+      "business",
+      "corporate",
+      "formal"
+    ]
+  },
+  "academic": {
+    "name": "Academic",
+    "primary_color": "#4F46E5",
+    "secondary_color": "#7C3AED",
+    "text_color": "#F9FAFB",
+    "background_color": "#1E293B",
+    "accent_color": "#F59E0B",
+    "header_style": "solid",
+    "bullet_style": "square",
+    "transitions": "fade",
+    "text_density": "detailed",
+    "max_bullet_points": 10,
+    "description": "An academic design for educational and research presentations",
+    "version": "1.0",
+    "tags": [
+      "academic",
+      "education",
+      "research"
+    ]
+  }
+}

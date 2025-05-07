@@ -1,0 +1,21 @@
+<!-- Content Slide Template -->
+<div class="content-slide">
+  <h2>{{ slide.title }}</h2>
+  
+  {% if slide.content %}
+  <ul class="bullet-list">
+    {% for point in slide.content %}
+    <li class="bullet-item">
+      <span class="bullet-icon"><i class="fas fa-circle"></i></span>
+      <span class="bullet-text">{{ point }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  
+  {% if slide.image_path %}
+  <div class="slide-image">
+    <img src="{{ slide.image_path }}" alt="{{ slide.title }} image">
+  </div>
+  {% endif %}
+</div> 

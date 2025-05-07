@@ -1,0 +1,31 @@
+<section class="slide slide-image w-full h-full bg-gray-900 relative overflow-hidden">
+    <div class="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
+    
+    {% if slide.image_path %}
+    <img src="{{ slide.image_path }}" alt="{{ slide.title }}" class="absolute inset-0 w-full h-full object-cover z-0">
+    {% endif %}
+    
+    <div class="relative z-20 p-10 flex flex-col h-full">
+        <h2 class="text-4xl font-bold mb-6 text-white drop-shadow-lg">{{ slide.title }}</h2>
+        
+        {% if slide.content and slide.content|length > 0 %}
+        <div class="flex-grow">
+            <p class="text-2xl text-white bg-black bg-opacity-40 inline-block p-4 rounded">
+                {{ slide.content[0] }}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if not slide.image_path and slide.image_suggestion %}
+    <div class="absolute inset-0 flex items-center justify-center text-xl text-gray-400">
+        <div class="p-4 border-2 border-dashed border-gray-600 rounded">
+            Image placeholder: {{ slide.image_suggestion }}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if slide.notes %}
+    <div class="notes hidden">{{ slide.notes }}</div>
+    {% endif %}
+</section> 

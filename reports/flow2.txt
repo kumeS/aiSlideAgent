@@ -1,0 +1,134 @@
+# AI Slide Generator 改善提案ワークフロー – Flow 2
+
+## 目的
+Flow 1 で整理した現状ワークフローと課題を踏まえ、本ドキュメントではコードベースへ反映可能な **具体的な改善方針** と **実装タスク** を示す。ここに記載された内容を順次実装することで、
+
+1. 検索結果とスライド内容のトレーサビリティ向上
+2. テンプレートとコンテンツの整合性強化
+3. 反復品質向上ループの効率化
+
+を達成することを目指す。
+
+---
+
+## A. エージェント間データモデルの再設計
+
+### A-1. ResearchResult → OutlineAgent 入力を構造化
+| フィールド | 型 | 説明 |
+|------------|----|------|
+| topic | str | 調査トピック |
+| primary":[{title:str, url:str, summary:str, credibility:float}] | list | 主要情報ソース |
+| secondary | list | 補助情報ソース |
+| gaps | list[str] | 未充足情報の一覧 |
+| full_summary | str | まとめ (LLM 生成) |
+| raw_chunks | list[str] | トークン制限対策として分割された原文抜粋 |
+| embedding":[float] | list | オプション: 類似検索用ベクトル |
+
+• `OutlineAgent` は `raw_chunks` を直接プロンプトへストリーミングする。これにより **LLM が"独自知識に逃げる"リスク** を低減。
+
+### A-2. SlideTrace メタデータの付与
+各 `SlideContent` に以下メタを追加:
+```json
+{
+  "sources": ["primary[2]", "secondary[0]"]
+}
+```
+• `ResearchAgent` が生成したインデックス文字列を利用し、**スライド ↔ 検索結果** の紐づけを維持。
+
+---
+
+## B. プロンプト設計改善
+
+### B-1. OutlineAgent Prompt
+```python
+prompt = f"""
+あなたは優秀なスライド構成プランナーです。以下の検索結果の抜粋を必ず引用しながら、"{topic}" のスライドアウトライン (max={slide_count}) を作成してください。
+
+検索結果抜粋 (Markdown リスト):
+{formatted_chunks}
+
+# 制約
+* 各スライドには必ず `引用:` セクションを追加し、使用した抜粋のインデックスを列挙する
+* 引用に無い情報を新規に追加しない
+"""
+```
+• トークン量を `formatted_chunks` で制御しつつ、引用強制ルールを明示。
+
+---
+
+## C. SlideWriterAgent – コンテンツ優先レンダリング
+
+1. HTML テンプレートに `{{ content }}` を **単一箇所** にまとめ、装飾は CSS に分離。
+2. 長文テキストは `split_text_to_bullets()` で自動段落化し、レイアウト崩れを回避。
+3. 画像・図表は `optimize_image_layout()` を適用してサイズ・配置を決定
+4. SlideTrace の `sources` を `<aside>` 内に JSON 埋め込み
+
+---
+
+## D. RefinerAgent – 自動検証の強化
+
+| 検証項目 | メトリック | 基準値 | 対応策 |
+|----------|-----------|--------|--------|
+| 引用反映率 | (#引用文含むスライド)/(総スライド) | ≥ 0.9 | 不足時に再生成要求 |
+| アクセシビリティ | WCAG 2.1 AA 準拠率 | 100% | 自動 lint + 修正 |
+| レスポンシブ | モバイル/デスク表示幅テスト | 崩れ 0 件 | flexbox fallback |
+
+### D-1. 失敗時のフォールバック拡張
+Refiner が基準未達の場合:
+```python
+if metric_fail:
+    if retry_count < 2:
+        slide_writer.regenerate(fix=feedback)
+    else:
+        logging.warning("品質基準未達: manual review required")
+```
+
+---
+
+## E. MonitoringAgent – 動的ループ制御
+
+`max_iterations` を固定値ではなく、**品質指標が閾値を超えた時点** で早期終了。
+```python
+while True:
+    ... # 生成 + 評価
+    if quality_score >= threshold or iteration >= hard_max:
+        break
+    iteration += 1
+```
+
+---
+
+## F. テンプレート適合性チェックパイプライン
+1. `template_selector.score(template, slide_outline)` を実装（内容量、画像枚数、トーン適合度）
+2. スコア < 0.7 の場合、自動で次点テンプレートへフォールバック
+
+---
+
+## G. 実装タスク一覧
+
+| Priority | Task | Owner | Issue ID |
+|----------|------|-------|----------|
+| P0 | DataModel v2 (Section A) 実装 | @backend | #101 |
+| P0 | OutlineAgent Prompt 更新 | @prompt | #102 |
+| P1 | SlideWriter レンダリング改修 (Section C) | @frontend | #103 |
+| P1 | RefinerAgent Metric Lint (Section D) | @qa | #104 |
+| P2 | MonitoringAgent ループ制御改修 | @backend | #105 |
+| P2 | Template 適合性チェック | @frontend | #106 |
+
+---
+
+## H. マイグレーション手順
+1. `protobuf` スキーマ更新 (ResearchResultV2, SlideContentV2)
+2. 既存保存データを `migration.py` で新スキーマに変換
+3. 旧 API エンドポイントを非推奨化し、互換レイヤー追加 (deprecated 6 months)
+
+---
+
+## I. 期待される効果
+- トレーサビリティ確保により、検索情報のスライド反映率が **+25%** 向上
+- テンプレート不適合によるレイアウト崩れ報告が **-40%**
+- 反復ループ平均回数が **3.1 → 1.8** に削減
+
+---
+
+以上、Flow 2 に従い実装を進めることで、AI Slide Generator の品質とユーザ体験が大幅に向上する見込みである。 

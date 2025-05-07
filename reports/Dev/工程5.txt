@@ -1,0 +1,9 @@
+
+### 5. SlideWriter & ImageFetcher
+
+| 項目      | 内容                                                                                                                            |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **要件**  | Tailwind で 16:9 レイアウト、CC0 画像自動 DL                                                                                             |
+| **手順**  | 1. `slide_writer.py`: `<section class="slide">`… を Jinja2 生成<br>2. `image_fetch.py`: Unsplash REST→最適解像度選択→`slide_assets/` 保存 |
+| **検証**  | Selenium で `index.html` を開き CLS<0.1, LCP<2.5s                                                                                 |
+| **成果物** | HTML テンプレ, 画像キャッシュ                                                                                                            |

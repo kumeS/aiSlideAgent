@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <title>量子セキュリティアイコン</title>
+  <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+    <path d="M12,2 L20,5.5 L20,11 C20,15.714 16.714,19 12,20 C7.286,19 4,15.714 4,11 L4,5.5 L12,2 Z" stroke="currentColor" stroke-width="1.5"/>
+    <circle cx="12" cy="11" r="4" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M12,7 L12,15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M8,11 L16,11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M9,8 L15,14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M9,14 L15,8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+</svg> 

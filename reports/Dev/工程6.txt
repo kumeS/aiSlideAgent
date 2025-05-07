@@ -1,0 +1,10 @@
+### 6. Refiner & QA ループ
+
+| 項目      | 内容                                                                                    |
+| ------- | ------------------------------------------------------------------------------------- |
+| **要件**  | WCAG 2.1 AA 配色, Grammarly API 校正 0 error                                              |
+| **手順**  | 1. `refiner.py`: Critique→Revise ループ (max\_round=3)<br>2. unittest: 色コントラスト、リンク切れチェック |
+| **検証**  | `poetry run pytest tests/test_accessibility.py` 緑                                     |
+| **成果物** | 改訂済み HTML, QA レポート                                                                    |
+
+---

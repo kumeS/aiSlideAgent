@@ -1,0 +1,44 @@
+# 不要ファイル一覧
+
+## バックアップ・修正ファイル
+- `app.py.bak`: app.pyのバックアップファイルで、現行バージョンがあるため不要
+- `app_fix.py`: app.pyのインポート修正用スクリプトで、修正が既に適用されていれば不要
+- `import_fix.py`: インポート修正用の単純なスクリプトで、修正が既に適用されていれば不要
+- `slides_fix.py`: 修正用スクリプトで、run_slides.pyが主要な機能を持っているため不要
+
+## 一時ファイル・キャッシュ
+- `__pycache__/`: Pythonのコンパイルキャッシュで、自動生成されるため削除可能
+- `agents/__pycache__/`: 同上
+- `agents/image_fetch/__pycache__/`: 同上
+- `agents/monitoring/__pycache__/`: 同上
+- `agents/outline/__pycache__/`: 同上
+- `agents/refiner/__pycache__/`: 同上
+- `agents/research/__pycache__/`: 同上
+- `agents/slide_writer/__pycache__/`: 同上
+- `agents/template_selector/__pycache__/`: 同上
+- `.pytest_cache/`: pytestのキャッシュディレクトリで削除可能
+- `tests/__pycache__/`: テスト用のキャッシュディレクトリで削除可能
+
+## テストデータ・結果
+- `test_output/`: テスト結果の出力ディレクトリで、プロダクション環境では不要
+- `test_slide_templates.py`: テンプレートテスト用スクリプトで、テスト完了後は不要
+
+## 重複する出力ディレクトリ
+- `static/output`の中の古い日付のディレクトリ（最新の数個以外）は削除可能
+  - 特に`20250506_03*`のディレクトリは古い生成結果で不要と思われる
+  - 最新の3-5個のディレクトリ以外は削除を検討
+
+
+## 開発用ファイル
+- `.cursor/`: エディタ固有の設定ファイルで、gitignoreに追加すべき
+- `.claude/`: エディタ固有の設定ファイルで、gitignoreに追加すべき（一部は既に.gitignoreに含まれている）
+
+## 古いデータファイル・サンプル
+- `result.json`: テスト結果もしくは古い結果ファイルと思われる
+
+
+
+## その他
+- 以下のファイルは互いに機能が重複している可能性があり、統合を検討:
+  - `run_slides.py`と`app.py`の一部機能
+  - `ml_research.md`（`quantum_research.json`と内容が重複している場合） 

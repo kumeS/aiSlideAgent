@@ -1,0 +1,15 @@
+{
+  "topic": "気候変動対策",
+  "summary": "気候変動対策は地球温暖化への対応策として重要です。再生可能エネルギーの導入、省エネルギー対策、森林保全などが主な取り組みです。",
+  "primary_results": [
+    {
+      "url": "https://example.com",
+      "title": "Example",
+      "snippet": "Example",
+      "content": "Example",
+      "credibility_score": 0.8
+    }
+  ],
+  "secondary_results": [],
+  "knowledge_gaps": []
+}

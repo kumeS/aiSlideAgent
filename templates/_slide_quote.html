@@ -1,0 +1,21 @@
+<section class="slide slide-quote flex flex-col items-center justify-center w-full h-full bg-gray-900 p-10">
+    <div class="max-w-4xl mx-auto text-center">
+        <div class="text-6xl text-gray-600 mb-6">"</div>
+        
+        {% if slide.content and slide.content|length > 0 %}
+        <blockquote class="text-3xl font-light italic mb-8 text-white">
+            {{ slide.content[0] }}
+        </blockquote>
+        {% endif %}
+        
+        {% if slide.content and slide.content|length > 1 %}
+        <cite class="text-xl text-blue-400 block">
+            — {{ slide.content[1] }}
+        </cite>
+        {% endif %}
+    </div>
+    
+    {% if slide.notes %}
+    <div class="notes hidden">{{ slide.notes }}</div>
+    {% endif %}
+</section> 
